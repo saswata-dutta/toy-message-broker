@@ -1,10 +1,12 @@
-import org.saswata.mssgq.{Broker, Consumer}
+import org.saswata.mssgq.{Broker, Consumer, Producer}
 
 object Main {
 
   def main(args: Array[String]): Unit = {
     val broker = new Broker(consumers, 5, 3)
-    broker.process("mssg 1")
+    val producer = new Producer(broker)
+
+    (1 to 10).foreach(_ => producer.produce())
   }
 
   private def consumeSuccess(mssg: String, id: Int): Boolean = {

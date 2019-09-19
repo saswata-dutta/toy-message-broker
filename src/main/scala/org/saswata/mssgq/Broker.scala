@@ -41,7 +41,7 @@ class Broker(consumers: Seq[Consumer], capacity: Int, retry: Int) {
     empty.release()
   }
 
-  def process(message: String): Unit = {
+  private def process(message: String): Unit = {
     val visited = mutable.Set[Int]()
     consumeOrder.foreach { consumer =>
       if (consumer.canConsume(message) && consumer.parents.forall(visited)) {
