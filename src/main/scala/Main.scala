@@ -22,7 +22,7 @@ object Main {
     new Consumer(1, Set.empty[Int], (_: String) => true, m => consumeSuccess(m, 1)),
     new Consumer(2, Set(7, 1), (_: String) => true, m => consumeSuccess(m, 2)),
     new Consumer(3, Set(1), (_: String) => true, m => consumeSuccess(m, 3)),
-    new Consumer(5, Set(2, 3), (_: String) => false, m => consumeSuccess(m, 5)),
+    new Consumer(5, Set(2, 3), (_: String) => true, m => consumeSuccess(m, 5)),
     new Consumer(4, Set(3), (_: String) => true, m => consumeSuccess(m, 4)),
     new Consumer(6, Set(4, 5), (_: String) => true, m => consumeSuccess(m, 6)),
     new Consumer(8, Set(6), (_: String) => true, m => consumeSuccess(m, 8))

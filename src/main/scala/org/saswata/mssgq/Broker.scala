@@ -1,6 +1,9 @@
 package org.saswata.mssgq
 
+import java.util.concurrent.Semaphore
+
 import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, Future}
 
 class Broker(consumers: Seq[Consumer], capacity: Int, retry: Int) {
   require(capacity > 0, "Capacity Empty")
@@ -10,20 +13,32 @@ class Broker(consumers: Seq[Consumer], capacity: Int, retry: Int) {
   private val consumeOrder: Seq[Consumer] =
     Broker.toposort(consumers).right.getOrElse(Seq.empty[Int]).map(consumerIndex)
 
+  val empty = new Semaphore(capacity, true)
+  val full = new Semaphore(0, true)
+
   def submit(message: String): Boolean = {
     // return false if message is invalid
     if (message == null || message.trim.isEmpty) return false
 
     // wait emptyCell
+    empty.acquire()
     // signal filledCell
+    full.release()
     // spawn a push in another thread
+    implicit val ec = ExecutionContext.global
+    Future {
+      push(message)
+    }
     true
   }
 
-  private def push(): Unit = {
+  private def push(message: String): Unit = {
     // wait filledCell
+    full.acquire()
     // pop and process mssg
+    process(message)
     // signal emptyCell
+    empty.release()
   }
 
   def process(message: String): Unit = {
