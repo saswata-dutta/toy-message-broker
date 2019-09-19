@@ -2,6 +2,29 @@ package org.saswata.mssgq
 
 import scala.collection.mutable
 
+class Broker(consumers: Seq[Consumer], capacity: Int) {
+  private val consumeOrder = Broker.toposort(consumers)
+  private val consumerIndex = consumers.map(it => (it.id, it)).toMap
+
+  def submit(message: String): Boolean = {
+    // return false if message is invalid
+    if (message == null || message.trim.isEmpty) return false
+
+    // wait emptyCell
+    // signal filledCell
+    // spawn a push in another thread
+    true
+  }
+
+  private def push(): Unit = {
+    // wait filledCell
+    // pop and process mssg
+    // signal emptyCell
+  }
+
+  private def process(message: String): Unit = {}
+}
+
 object Broker {
 
   case class Edge(src: Int, dst: Int)
