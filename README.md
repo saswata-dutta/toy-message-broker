@@ -16,7 +16,7 @@ Broker
 Consumer
     has an id
     has a list of parent id-s (may be empty)
-    has a predicate checkPayload(mssg) => bool
-    receive() : return true if passed without exception
+    has a predicate canConsume(mssg) => bool
+    consume() : return true if passed without exception
 
 
