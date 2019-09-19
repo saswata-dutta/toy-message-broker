@@ -2,9 +2,13 @@ package org.saswata.mssgq
 
 import scala.collection.mutable
 
-class Broker(consumers: Seq[Consumer], capacity: Int) {
-  private val consumeOrder = Broker.toposort(consumers)
+class Broker(consumers: Seq[Consumer], capacity: Int, retry: Int) {
+  require(capacity > 0, "Capacity Empty")
+  require(retry >= 0, "Retry Empty")
+
   private val consumerIndex = consumers.map(it => (it.id, it)).toMap
+  private val consumeOrder: Seq[Consumer] =
+    Broker.toposort(consumers).right.getOrElse(Seq.empty[Int]).map(consumerIndex)
 
   def submit(message: String): Boolean = {
     // return false if message is invalid
@@ -22,7 +26,26 @@ class Broker(consumers: Seq[Consumer], capacity: Int) {
     // signal emptyCell
   }
 
-  private def process(message: String): Unit = {}
+  def process(message: String): Unit = {
+    val visited = mutable.Set[Int]()
+    consumeOrder.foreach { consumer =>
+      if (consumer.canConsume(message) && consumer.parents.forall(visited)) {
+        var retriesLeft = retry
+        var done = false
+        while (retriesLeft > 0 && !done) {
+          if (consumer.consume(message)) {
+            done = true
+            visited += consumer.id
+          } else {
+            retriesLeft -= 1
+            println(s"retry ${retry - retriesLeft} : $message for ${consumer.id}")
+            // maybe pause after a retry here
+          }
+        }
+      }
+    }
+  }
+
 }
 
 object Broker {
